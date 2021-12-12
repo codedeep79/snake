@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Snake game, which can strengthen your use and understanding of the array structure with JS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        canvas {
+            width: 350px;
+            height: 180px;
+            background-color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id='canvas'></canvas>
+</body>
+<script>
+
+    let canvas = document.getElementById('canvas'),
+        ctx = canvas.getContext('2d'),
+        c_width = canvas.width,
+        c_height = canvas.height;
+
+
+    function random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function Snake() {
+
+        this.num = 4;
+
+        this.w = 4;
+
+        this.body = [];
+
+        this.diretion = 'right';
+
+        this.isLive = true;
+
+        this.score = 0;
+
+        for (let i = 0; i < this.num; i++) {
+            this.body.push({ x: i, y: 0 });
+        }
+
+        this.food = { x: Math.floor(random(1, c_width / this.w)), y: Math.floor(random(1, c_height / this.w)) };
+    }
+
+    Snake.prototype.render = function () {
+
+        let header_node = this.body[0];
+        ctx.fillStyle = "#f00";
+        ctx.fillRect(header_node.x * this.w, header_node.y * this.w, this.w, this.w);
+        ctx.fillStyle = "#ff0";
+        ctx.strokeRect(header_node.x * this.w, header_node.y * this.w, this.w, this.w);
+
+        for (let i = 1; i < this.num; i++) {
+            let node = this.body[i];
+            ctx.fillStyle = "#ff0";
+            ctx.fillRect(node.x * this.w, node.y * this.w, this.w, this.w);
+            ctx.fillStyle = "#f00";
+            ctx.strokeRect(node.x * this.w, node.y * this.w, this.w, this.w);
+        }
+
+
+        ctx.fillStyle = "#0f0";
+        ctx.fillRect(this.food.x * this.w, this.food.y * this.w, this.w, this.w);
+        ctx.fillStyle = "#0f0";
+        ctx.strokeRect(this.food.x * this.w, this.food.y * this.w, this.w, this.w);
+
+
+        ctx.fillStyle = "#fff";
+        ctx.fillText(this.score, this.w, this.w * 2);
+    }
+
+    Snake.prototype.update = function () {
+        let head_x = this.body[0].x,
+            head_y = this.body[0].y;
+
+        if (this.diretion == 'right') {
+            head_x++;
+            if (this.w * head_x >= c_width) {
+
+                this.isLive = false;
+            }
+        } else if (this.diretion == 'left') {
+            head_x--;
+            if (head_x <= 0) {
+
+                this.isLive = false;
+            }
+        } else if (this.diretion == 'up') {
+            head_y--;
+            if (head_y <= 0) {
+
+                this.isLive = false;
+            }
+        } else if (this.diretion == 'down') {
+            head_y++;
+            if (head_y * this.w >= c_height) {
+
+                this.isLive = false;
+            }
+        }
+        if (this.food.x == head_x && this.food.y == head_y) {
+
+            tail = { x: head_x, y: head_y };
+
+            this.num++;
+
+            this.food = { x: Math.floor(random(1, c_width / this.w)), y: Math.floor(random(1, c_height / this.w)) };
+
+            this.score++;
+        } else {
+            tail = this.body.pop();
+            tail.x = head_x;
+            tail.y = head_y;
+        }
+
+        this.body.unshift(tail);
+    }
+
+    document.addEventListener("keydown", function (e) {
+        e = e || window.event;
+        let kc = e.keyCode;
+        console.log(e.keyCode);
+
+        if (kc == 38) {
+
+            if (snake.diretion != 'down') {
+                snake.diretion = 'up';
+            }
+
+        } else if (kc == 40) {
+            if (snake.diretion != 'up') {
+                snake.diretion = 'down';
+            }
+
+        } else if (kc == 37) {
+            if (snake.diretion != 'right') {
+                snake.diretion = 'left';
+            }
+
+        } else if (kc == 39) {
+            if (snake != 'left') {
+                snake.diretion = 'right';
+            }
+
+        } else if (kc == 66) {
+            snake = new Snake();
+            lock = setInterval(run, 55);
+        }
+    })
+    let snake = new Snake();
+
+    function run() {
+        if (snake.isLive) {
+
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, c_width, c_height);
+
+            snake.render();
+            snake.update();
+        } else {
+
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, c_width, c_height);
+            ctx.fillStyle = "#fff"
+            ctx.textAlign = 'center';
+            ctx.fillText("Game over!", c_width / 2, c_height / 2);
+            ctx.fillText("Press B start again", c_width / 2, c_height / 2 + 15);
+            clearInterval(lock);
+        }
+    }
+    var lock = setInterval(run, 55);
+</script>
+
+</html>
